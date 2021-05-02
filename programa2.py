@@ -87,21 +87,26 @@ while(salir!=True):
             clss1Comida=int(input("Cantidad de comida de 1ra clase= "))
             clss2Comida=int(input("Cantidad de comida de 2ra clase= "))
             clss3Comida=int(input("Cantidad de comida de 3ra clase= "))
-            clssComida[0]=clssComida[0]+clss1Comida
-            clssComida[1]=clssComida[1]+clss2Comida
-            clssComida[2]=clssComida[2]+clss3Comida
+
             clss1Bebida=int(input("Cantidad de bebida de 1ra clase= "))
             clss2Bebida=int(input("Cantidad de bebida de 2ra clase= "))
             clss3Bebida=int(input("Cantidad de bebida de 3ra clase= "))
-            clssBebida[0]=clssBebida[0]+clss1Bebida
-            clssBebida[1]=clssBebida[1]+clss2Bebida
-            clssBebida[2]=clssBebida[2]+clss3Bebida
+
             clss1Pelicula=int(input("Cantidad de pelicula de 1ra clase= "))
             clss2Pelicula=int(input("Cantidad de pelicula de 2ra clase= "))
             clss3Pelicula=int(input("Cantidad de pelicula de 3ra clase= "))
-            clssPelicula[0]=clssPelicula[0]+clss1Pelicula
-            clssPelicula[1]=clssPelicula[1]+clss2Pelicula
-            clssPelicula[2]=clssPelicula[2]+clss3Pelicula
+            if(clss1Comida>=0 and clss1Bebida>=0 and clss1Pelicula>=0 and clss2Comida>=0 and clss2Bebida>=0 and clss2Pelicula>=0 and clss3Comida>=0 and clss3Bebida>=0 and clss3Pelicula>=0):
+                clssComida[0]=clssComida[0]+clss1Comida
+                clssComida[1]=clssComida[1]+clss2Comida
+                clssComida[2]=clssComida[2]+clss3Comida
+                clssBebida[0]=clssBebida[0]+clss1Bebida
+                clssBebida[1]=clssBebida[1]+clss2Bebida
+                clssBebida[2]=clssBebida[2]+clss3Bebida
+                clssPelicula[0]=clssPelicula[0]+clss1Pelicula
+                clssPelicula[1]=clssPelicula[1]+clss2Pelicula
+                clssPelicula[2]=clssPelicula[2]+clss3Pelicula
+            else:
+                print("Se a ingresado un dato erroneo por favor intentelo de nuevo")
         elif(opc==2):
             name=str(input("Ingrese su nombre:"))
             clssVuelo=0
