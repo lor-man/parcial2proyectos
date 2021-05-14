@@ -7,7 +7,7 @@ print("Boletos aerolinea")
 def postgres_insert(nombre,vuelo,clss1,clss2,clss3,subTotal,descuento,total):
     conexion=None
     try:
-        conexion=ps.connect(database="Parcial2",user="postgres",password="123456",host="172.31.64.1",port="5432")
+        conexion=ps.connect(database="Parcial2",user="postgres",password="123456",host="192.168.1.74",port="5432")
         cursor=conexion.cursor()
         cursor.execute("""INSERT INTO public."boletosAerolinea"("ID", nombre, "claseVuelo", "cantClase1", "cantClase2", "cantClase3", subtotal, descuento, total) 
         VALUES (nextval('pk_boletosAerolinea'), %(nm)s, %(clssV)s, %(cntClss1)s, %(cntClss2)s, %(cntClss3)s,%(sub)s,%(des)s,%(total)s); """,
@@ -23,7 +23,7 @@ def postgres_insert(nombre,vuelo,clss1,clss2,clss3,subTotal,descuento,total):
 def postgres_select():
     conexion=None
     try:
-        conexion=ps.connect(database="Parcial2",user="postgres",password="123456",host="172.31.64.1",port="5432")
+        conexion=ps.connect(database="Parcial2",user="postgres",password="123456",host="192.168.1.74",port="5432")
         cursor=conexion.cursor()
         cursor.execute("""SELECT * FROM public."boletosAerolinea" ORDER BY "ID" ASC""")
         datos=cursor.fetchall()
@@ -51,7 +51,7 @@ def postgres_select():
 def postgres_delet(id):
     conexion=None
     try:
-        conexion=ps.connect(database="Parcial2",user="postgres",password="123456",host="172.31.64.1",port="5432")
+        conexion=ps.connect(database="Parcial2",user="postgres",password="123456",host="192.168.1.74",port="5432")
         cursor=conexion.cursor()
         cursor.execute("""DELETE FROM public."boletosAerolinea" WHERE "ID"=%(id)s;""",{'id':id})
         conexion.commit()
@@ -108,7 +108,7 @@ while(salir!=True):
             else:
                 print("Se a ingresado un dato erroneo por favor intentelo de nuevo")
         elif(opc==2):
-            name=str(input("Ingrese su nombre:"))
+            name=""
             clssVuelo=0
             clssBebida=[0,0,0]
             clssComida=[0,0,0]
@@ -123,12 +123,12 @@ while(salir!=True):
             for cnt in clssPelicula:
                 cntServicios=cntServicios+cnt
             subtotal=50*clssComida[0]+40*clssComida[1]+25*clssComida[2]+35*clssBebida[0]+25*clssBebida[1]+10*clssBebida[2]+70*clssPelicula[0]+55*clssPelicula[1]+25*clssPelicula[2]
-            if(cntServicios>=10):
-                Descuento= 0.1*subtotal
+            if(cntServicios>=10 and clssBebida[0]>=1 and clssComida[0]>=1 and clssPelicula[0]>=1 ):
+                Descuento= 0.15*subtotal
             elif(clssVuelo==1 and clssBebida[1]==clssBebida[2]==clssComida[1]==clssComida[2]==clssPelicula[1]==clssPelicula[2]==0 and clssBebida[0]>=1 and clssComida[0]>=1 and clssPelicula[0]>=1):
                 Descuento= 0.05*subtotal
-            elif(cntServicios>=10 and clssBebida[0]>=1 and clssComida[0]>=1 and clssPelicula[0]>=1 ):
-                    Descuento = 0.15*subtotal
+            elif(cntServicios>=10):
+                    Descuento = 0.10*subtotal
             else:
                 Descuento=0
             cntServicios1=clssBebida[0]+clssComida[0]+clssPelicula[0]

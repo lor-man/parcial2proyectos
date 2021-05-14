@@ -1,5 +1,6 @@
 from tkinter import Tk,Frame,StringVar,Entry,Button,Label,Spinbox,messagebox,Text,Scrollbar,INSERT,END
 from tkinter import ttk
+
 import psycopg2 as ps
 
 class aerolinea(Frame):
@@ -23,6 +24,7 @@ class aerolinea(Frame):
         self.desc=StringVar()
         self.toTal=StringVar()
         self.nombreVar=StringVar()
+        self.regElim=StringVar()
         #
         self.com1clss=StringVar()
         self.beb1clss=StringVar()
@@ -91,6 +93,7 @@ class aerolinea(Frame):
         #-------Entrada de nombre y seleccion de clase
         self.clssg=Label(self.frame_4,text="Clase de vuelo",padx=10, pady=5).grid(row=2,column=1)
         self.nombre=Label(self.frame_4,text="Nombre",padx=10,pady=5).grid(row=1,column=1)
+        self.registroElim=Label(self.frame_4,text="Registro a eliminar (ID)",padx=10,pady=5).grid(row=3,column=1)
         #-------subtotal, descuento y total--------------
         self.subtotal=Label(self.frame_0,text="Subtotal",padx=10,pady=5).grid(row=6,column=1,columnspan=2)
         self.Descuento=Label(self.frame_0,text="Descuento",padx=10,pady=5).grid(row=7,column=1,columnspan=2)
@@ -109,7 +112,9 @@ class aerolinea(Frame):
         self.clss3Comida=Spinbox(self.frame_0,textvariable=self.com3clss,from_=0,to=30,state="readonly",width=2).grid(row=5,column=2)
         self.clss3Bebida=Spinbox(self.frame_0,textvariable=self.beb3clss,from_=0,to=30,state="readonly",width=2).grid(row=5,column=3)
         self.clss3Pelicula=Spinbox(self.frame_0,textvariable=self.pel3clss,from_=0,to=30,state="readonly",width=2).grid(row=5,column=4)
-        #
+        #Eliminacion de registro
+        self.elimReg=Spinbox(self.frame_4,textvariable=self.regElim,from_=0,to=1000,state="readonly",width=4).grid(row=3,column=2)
+
     def combobox(self): 
         clssOpc=["","1","2","3"]
         self.clssopc=ttk.Combobox(self.frame_4,values=clssOpc,textvariable=self.clssVuelo,state="readonly",width=2).grid(row=2,column=2)
@@ -119,12 +124,13 @@ class aerolinea(Frame):
         self.button_1=Button(self.frame_2,text="Salir",command=self.master.destroy).grid(row=1,column=2)
         self.button_2=Button(self.frame_2,text="Reporte",command=self.postgres_select).grid(row=1,column=3)
         self.button_3=Button(self.frame_2,text="Calcular",command=self.calc).grid(row=1,column=4)    
+        self.button_4=Button(self.frame_2,text="Eliminar",command=self.eliminarReg).grid(row=1,column=5)
 
     def entry(self):
         self.entryNombre=Entry(self.frame_4,textvariable=self.nombreVar).grid(row=1,column=2) #Entrada de nombre   
         self.sub_total=Entry(self.frame_0,textvariable=self.subTotal,state="disable",width=6).grid(row=6,column=3,columnspan=2)
-        self.descuento_0=Entry(self.frame_0,textvariable=self.desc,width=6).grid(row=7,column=3,columnspan=2)
-        self.total_0=Entry(self.frame_0,textvariable=self.toTal,width=6).grid(row=8,column=3,columnspan=2)
+        self.descuento_0=Entry(self.frame_0,textvariable=self.desc,width=6,state="disable").grid(row=7,column=3,columnspan=2)
+        self.total_0=Entry(self.frame_0,textvariable=self.toTal,width=6,state="disable").grid(row=8,column=3,columnspan=2)
 
     def limpiar(self):
         self.nombreVar.set("")#Variable de nombre
@@ -151,7 +157,7 @@ class aerolinea(Frame):
     def postgres_insert(self,nombre,vuelo,clss1,clss2,clss3,subTotal,descuento,total):
         conexion=None
         try:
-            conexion=ps.connect(database="Parcial2",user="postgres",password="123456",host="172.31.64.1",port="5432")
+            conexion=ps.connect(database="Parcial2",user="postgres",password="123456",host="172.27.192.1",port="5432")
             cursor=conexion.cursor()
             cursor.execute("""INSERT INTO public."boletosAerolinea"("ID", nombre, "claseVuelo", "cantClase1", "cantClase2", "cantClase3", subtotal, descuento, total)
             VALUES (nextval('pk_boletosAerolinea'), %(nm)s, %(clssV)s, %(cntClss1)s, %(cntClss2)s
@@ -168,7 +174,7 @@ class aerolinea(Frame):
         self.text_0.delete(1.0,END)
         conexion=None
         try:
-            conexion=ps.connect(database="Parcial2",user="postgres",password="123456",host="172.31.64.1",port="5432")
+            conexion=ps.connect(database="Parcial2",user="postgres",password="123456",host="172.27.192.1",port="5432")
             cursor=conexion.cursor()
             cursor.execute("""SELECT "ID","nombre",subtotal,descuento,total  FROM public."boletosAerolinea" ORDER BY "ID" ASC""")
             datos=cursor.fetchall()
@@ -193,6 +199,28 @@ class aerolinea(Frame):
         finally:
             if(conexion is not None):
                 conexion.close()
+    def eliminarReg(self):
+        conexion=None
+        try:
+            conexion=ps.connect(database="Parcial2",user="postgres",password="123456",host="172.27.192.1",port="5432")
+            cursor=conexion.cursor()
+            cursor.execute("""SELECT "ID" FROM public."boletosAerolinea" WHERE "ID"=%(id)s;""",{'id':int(self.regElim.get())})
+            datos=cursor.fetchall()
+            if (datos):
+                cursor.execute("""DELETE FROM "boletosAerolinea" WHERE "ID"=%(id)s;""",{'id':int(self.regElim.get())})
+                conexion.commit()
+                cursor.close()
+                messagebox.showinfo(title="Información",message="Registro eliminado con exito")
+                self.regElim.set("")
+            else:
+                messagebox.showerror(title="Error",message="Registro no encontrado")
+        except (Exception, ps.Error) as error:
+            messagebox.showerror(title="Error",message="Usuario no encontrado")
+            print("Error al obtener datos ", error)
+        finally:
+            if conexion is not None:
+                conexion.close()
+
 
     def calc(self):
         try:
@@ -240,6 +268,197 @@ class aerolinea(Frame):
         except Exception as exc:
             print(str(exc)+"\n Algo va mal")
 
+class login(Frame):
+    def __init__(self,master):
+        super().__init__(master)
+        self.master.title("Login")
+        self.master.geometry("200x100")
+        self.frame_0=Frame(self.master)
+        self.frame_0.grid(row=1,column=1)
+        self.nombreVar=StringVar()
+        self.claveVar=StringVar()    
+        self.label()
+        self.entry()
+        self.button()
+
+    def label(self):
+        self.nombre=Label(self.frame_0,text="Username").grid(row=2,column=1)
+        self.clave=Label(self.frame_0,text="Password").grid(row=3,column=1)
+    def entry(self):
+        self.nombreE=Entry(self.frame_0,textvariable=self.nombreVar).grid(row=2,column=2)
+        self.claveE=Entry(self.frame_0,textvariable=self.claveVar,show='*').grid(row=3,column=2)
+
+    def button(self):
+        self.loginB=Button(self.frame_0,text="login",command=self.loginF).grid(row=4,column=1,columnspan=2)
+    def loginF(self):
+        print(self.nombreVar.get())
+        print(self.claveVar.get())
+        self.postgres_select(self.nombreVar.get(),self.claveVar.get())
+    
+    def postgres_select(self,nom,passs):
+        conexion=None
+        try:
+            conexion=ps.connect(database="Parcial2",user="postgres",password="123456",host="172.27.192.1",port="5432")
+            cursor=conexion.cursor()
+            cursor.execute("""SELECT rol FROM public.users where "user"=%(nombre)s and  password=crypt(%(contra)s,password);""",{'nombre':nom,'contra':passs})
+            datos=cursor.fetchall()
+            #Parte de Tkinter
+            if datos:
+                messagebox.showinfo(title="Login correcto",message="Usuario y contraseña correctos")
+                self.master.destroy()
+                print(datos[0][0])
+                if(datos[0][0]=='admin'):
+                    vent2()
+                elif(datos[0][0]=='user'):
+                    vent1()                
+            else:
+                messagebox.showerror(title = "Login incorrecto", message = "Usuario o contraseña incorrecta")
+        except (Exception, ps.Error) as error:
+            print("Error al obtener datos ", error)
+        finally:
+            if(conexion is not None):
+                conexion.close()
+
+class gestionUsuarios(Frame):
+    def __init__(self,master):
+        super().__init__(master)
+        self.master.title("Gestion usuarios")
+        self.notebook=ttk.Notebook(self.master)
+        self.notebook.pack(fill='both',expand='yes')
+        self.frame0=Frame(self.notebook)
+        self.frame1=Frame(self.notebook)
+        self.frame2=Frame(self.notebook)
+        self.notebook.add(self.frame0,text="Agregar")
+        self.notebook.add(self.frame2,text="Ver usuarios")
+        self.notebook.add(self.frame1,text="Eliminar")
+        self.name=StringVar()
+        self.pass0=StringVar()
+        self.pass1=StringVar()
+        self.rol=StringVar()
+        self.elimId=StringVar()
+        self.label()
+        self.entry()
+        self.button()
+        self.text_0=Text(self.frame2)
+        self.text_0.grid(row=1,column=2)
+        self.scrollvertical = Scrollbar(self.frame3,command=self.text_0.yview)
+        self.scrollvertical.grid(row=1,column=2,sticky="nsew")
+        self.text_0.config(yscrollcommand=self.scrollvertical.set)
+
+    def label(self):
+        #Pestana agregar usuarios
+        self.nombre=Label(self.frame0,text="Nombre: ").grid(row=1,column=1)
+        self.passw=Label(self.frame0,text="Contraseña: ").grid(row=2,column=1)
+        self.passww=Label(self.frame0,text="Confirmar contraseña: ").grid(row=3,column=1)
+        #Pestana ver usuarios
+        self.roll=Label(self.frame0,text="Rol: ").grid(row=4,column=1)
+        #Pestana eliminar usuarios
+        self.elim=Label(self.frame1,text="Eliminar usuario (ID): ").grid(row=1,column=1)
+    def entry(self):
+        clssOpc=["","admin","user"]
+        self.nombreE=Entry(self.frame0,textvariable=self.name).grid(row=1,column=2)
+        self.passE=Entry(self.frame0,textvariable=self.pass0,show='*').grid(row=2,column=2)
+        self.passE0=Entry(self.frame0,textvariable=self.pass1,show='*').grid(row=3,column=2)
+        self.rollE=ttk.Combobox(self.frame0,values=clssOpc,textvariable=self.rol,state="readonly",width=8).grid(row=4,column=2)
+        #Selector de id para la pesta;a de eliminacion
+        self.idElim=Spinbox(self.frame1,textvariable=self.elimId,from_=2,to=1000,state="readonly",width=4).grid(row=1,column=2)
+    
+    def button(self):
+        #Agregar usuario
+        self.addB=Button(self.frame0,text="Agregar",command=self.agregarUser).grid(row=5,column=1,columnspan=2)
+        #Ver usuarios
+        self.verB=Button(self.frame2,text="Ver usuarios",command=self.verUser).grid(row=1,column=1)
+        #Eliminar usuario
+        self.elimB=Button(self.frame1,text="Eliminar",command=self.elimUser).grid(row=2,column=1,columnspan=2)
+    
+    def agregarUser(self):
+        if(self.pass0.get()!=self.pass1.get()):
+            messagebox.showerror(title = "Error", message = "Las contraseñas no coinciden")
+        elif(self.rol.get()==""):
+            messagebox.showerror(title = "Error", message = "No se selecciono algun rol")
+        else:
+            conexion=None
+            try:
+                conexion=ps.connect(database="Parcial2",user="postgres",password="123456",host="172.27.192.1",port="5432")
+                cursor=conexion.cursor()
+                cursor.execute("""INSERT INTO public.users("ID", "user", password, rol)
+                VALUES (nextval('pkusers'), %(nom)s,crypt(%(passw0)s,gen_salt('bf')),%(rol0)s);
+                 """,{'nom':self.name.get(),'passw0':self.pass0.get(),'rol0':self.rol.get()})
+                conexion.commit()
+                cursor.close()
+                messagebox.showinfo(title="Información",message="Usuario agregado con exito")
+                self.name.set("")
+                self.pass0.set("")
+                self.pass1.set("")
+                self.rol.set("")
+            except (Exception, ps.Error) as error:
+                print("Error al obtener datos ", error)
+            finally:
+                if conexion is not None:
+                    conexion.close()
+                    
+    def verUser(self):
+        self.text_0.delete(1.0,END)
+        conexion=None
+        try:
+            conexion=ps.connect(database="Parcial2",user="postgres",password="123456",host="172.27.192.1",port="5432")
+            cursor=conexion.cursor()
+            cursor.execute("""SELECT "ID","user",rol FROM public.users ORDER BY "ID" ASC""")
+            datos=cursor.fetchall()
+            print("-------------------------------Registro-----------------------------")
+            for fila in datos:
+                print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+                print("ID: ",fila[0])
+                print("Nombre: ",fila[1])
+                print("Rol:    ",fila[2])
+                print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+                cursor.close()
+                print("--------------------------------------------------------------------")
+        #Parte de Tkinter
+            self.text_0.insert(INSERT,"ID\tNOMBRE\trol\n")
+            for fila in datos:
+                self.text_0.insert(INSERT,"_______________________________________________________________________\n")
+                self.text_0.insert(INSERT,"{}\t{}\t{}\t\n".format(fila[0],fila[1],fila[2]))
+        except (Exception, ps.Error) as error:
+            print("Error al obtener datos ", error)
+        finally:
+            if(conexion is not None):
+                conexion.close()
+
+    def elimUser(self):
+        conexion=None
+        try:
+            conexion=ps.connect(database="Parcial2",user="postgres",password="123456",host="172.27.192.1",port="5432")
+            cursor=conexion.cursor()
+            cursor.execute("""SELECT user FROM public.users where "ID"=%(id)s;""",{'id':int(self.elimId.get())})
+            datos=cursor.fetchall()
+            if (datos):
+                cursor.execute("""DELETE FROM public.users WHERE "ID"=%(id)s;""",{'id':int(self.elimId.get())})
+                conexion.commit()
+                cursor.close()
+                messagebox.showinfo(title="Información",message="Usuario eliminado con exito")
+                self.elimId.set("")
+            else:
+                messagebox.showerror(title="Error",message="Usuario no encontrado")
+        except (Exception, ps.Error) as error:
+            messagebox.showerror(title="Error",message="Usuario no encontrado")
+            print("Error al obtener datos ", error)
+        finally:
+            if conexion is not None:
+                conexion.close()
+
+def vent1():
+    root=Tk()
+    aer=aerolinea(root)
+    aer.mainloop()    
+def vent2():
+    root=Tk()
+    gest=gestionUsuarios(root)
+    gest.mainloop()    
+
+
 root=Tk()
-aer=aerolinea(root)
-aer.mainloop()
+#aer=aerolinea(root)
+#aer.mainloop()
+log=login(root)
+log.mainloop()

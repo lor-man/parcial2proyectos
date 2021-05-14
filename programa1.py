@@ -7,7 +7,7 @@ print("Control de citas")
 def postgres_insert(nombre,edad,peso,altura,fecha,hora):
     conexion=None
     try:
-        conexion=ps.connect(database="Parcial2",user="postgres",password="123456",host="172.31.64.1",port="5432")
+        conexion=ps.connect(database="Parcial2",user="postgres",password="123456",host="192.168.1.74",port="5432")
         #cursor=conexion.cursor("""INSERT INTO public."controlCitas"("ID", nombre, edad, peso, altura, fecha, hora)VALUES (nextval('pk_controlCitas'), %s, %s, %s, %s, %s,%s); """,(nombre,edad,peso,altura,fecha,hora))
         cursor=conexion.cursor()
         cursor.execute("""INSERT INTO public."controlCitas"("ID", nombre, edad, peso, altura, fecha, hora)VALUES (nextval('pk_controlCitas'), %(nm)s, %(ed)s, %(pes)s, %(alt)s, %(date)s,%(h)s); """,{'nm':nombre,'ed':edad ,'pes':peso ,'alt':altura ,'date':fecha ,'h':hora})
@@ -23,7 +23,7 @@ def postgres_select(fecha):
     #selectquery=""" SELECT "ID",nombre,hora FROM public."controlCitas" where fecha = '2021-04-22'; """
     conexion=None
     try:
-        conexion=ps.connect(database="Parcial2",user="postgres",password="123456",host="172.31.64.1",port="5432")
+        conexion=ps.connect(database="Parcial2",user="postgres",password="123456",host="192.168.1.74",port="5432")
         cursor=conexion.cursor()
         cursor.execute(""" SELECT "ID",nombre,hora FROM public."controlCitas" where fecha = %(fecha)s; """,{'fecha':fecha})
         datos=cursor.fetchall()
@@ -40,10 +40,11 @@ def postgres_select(fecha):
     finally:
         if(conexion is not None):
             conexion.close()
+            
 def postgres_delet(id):
     conexion=None
     try:
-        conexion=ps.connect(database="Parcial2",user="postgres",password="123456",host="172.31.64.1",port="5432")
+        conexion=ps.connect(database="Parcial2",user="postgres",password="123456",host="192.168.1.74",port="5432")
         cursor=conexion.cursor()
         cursor.execute("""DELETE FROM public."controlCitas" WHERE "ID"=%(id)s;""",{'id':id})
         conexion.commit()
